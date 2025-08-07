@@ -1,0 +1,123 @@
+import { Button, GridBox, VerticalBox, ScrollView, HorizontalBox, ListView, ComboBox } from "std-widgets.slint";
+import { BeautifyButton } from "beauty_button.slint";
+export component CommandSetWindow inherits Dialog {
+    width: 600px;
+    height: 400px;
+    in-out property <[{key: string, value: float}]> data:
+    [{ key: "Name", value: 1.2 }, { key: "Age", value: 25.5 }, { key: "City", value: 3.14 }];
+    callback submit([{key: string, value: float}]);
+    callback add_item();
+    title: "Command Set";
+    ScrollView {
+        height: parent.height;
+        VerticalLayout {
+            height: parent.height;
+            width: parent.width;
+            alignment: center;
+            HorizontalBox {
+                width: parent.width;
+                ListView {
+                    height: root.height - 120px;
+                    width: parent.width;
+                    for item in data: Rectangle {
+                        width: parent.width - 20px;
+                        background: @radial-gradient(circle, #b834b1, #c7c8de 50%, #070715 100%);
+                        border-radius: 8px;
+                        border-color: #700867;
+                        border-width: 3px;
+                        drop-shadow-color: #08091c;
+                        drop-shadow-blur: 15px;
+                        
+                        drop-shadow-offset-y: 3px;
+                        
+                        HorizontalBox {
+                            width: parent.width - 50px;
+                            Rectangle {}
+                            HorizontalBox {
+                                width: parent.width/2;
+                                Text {
+                                    width: 5rem;
+                                    text: "属性名:";
+                                    font-family: "宋体";
+                                    font-size: 16px;
+                                    letter-spacing: 1px;
+                                    stroke-width: 1px;
+                                    stroke-style: center;
+                                    stroke: #6b2da4;
+                                    vertical-alignment: center;
+                                    horizontal-alignment:center;
+                                }
+                                Rectangle {
+                                    background: #ffffff2e;
+                                    border-radius: 3px;
+                                    TextInput {
+                                        selection-background-color: #9c9c9c;
+                                        text: item.key;
+                                        input-type: text;
+                                        vertical-alignment: center;
+                                    }
+                                }
+                            }
+
+                            HorizontalBox {
+                                width: parent.width/2;
+                                Text {
+                                    text: "属性值:";
+                                    font-family: "宋体";
+                                    font-size: 16px;
+                                    width: 5rem;
+                                    letter-spacing: 1px;
+                                    stroke-width: 1px;
+                                    stroke-style: center;
+                                    vertical-alignment: center;
+                                    stroke: #6b2da4;
+                                    horizontal-alignment:center;
+                                }
+                                Rectangle {
+                                    background: #ffffff2e;
+                                    border-radius: 3px;
+                                TextInput {
+                                    selection-background-color: #9c9c9c;
+                                    text: item.value;
+                                    input-type: number;
+                                    vertical-alignment: center;
+                                }}
+                            }
+                        }
+                    }
+                }
+            }
+
+            HorizontalBox {
+                alignment: center;
+                GridBox {
+                    width: 200px;
+                    height: 60px;
+                    spacing: 2px;
+                    Rectangle {
+                        border-radius: 10px;
+                        border-width: 2px;
+                        border-color: #ffde59;
+                        width: parent.width;
+                        height: parent.height;
+                        drop-shadow-color: #060b9e;
+                        drop-shadow-blur: 10px;
+                        HorizontalBox {
+                            alignment: center;
+                            BeautifyButton {
+                                text: "新增";
+                                on_click => {
+                                    add_item();
+                                }
+                            }
+
+                            BeautifyButton {
+                                text: "保存";
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

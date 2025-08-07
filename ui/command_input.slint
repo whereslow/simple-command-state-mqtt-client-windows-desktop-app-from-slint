@@ -1,0 +1,31 @@
+import { GridBox } from "std-widgets.slint";
+import { BeautifyButton } from "beauty_button.slint";
+export component CommandInput {
+    width: 300px;
+    height: 60px;
+    in-out property <string> name:"命令";
+    Rectangle {
+        background: #74a8ae;
+        border-radius: 8px;
+        border-color: black;
+        border-width: 1px;
+        GridBox {
+            Text {
+                text: name;
+                horizontal-alignment: center;
+                vertical-alignment: center;
+                font-size: 24px;
+                font-weight: 10;
+                col: 0;
+                row: 0;
+            }
+
+            BeautifyButton {
+                color: #273e33;
+                text: "执行";
+                col: 1;
+                row: 0;
+            }
+        }
+    }
+}
