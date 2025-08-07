@@ -1,0 +1,73 @@
+import { Button } from "std-widgets.slint";
+export component BeautifyButton {
+    width: 80px;
+    height: 40px;
+    in property <string> text;
+    in property <brush> color: #4a69c8;
+    property <brush> hover_color: rgb(
+        color.red,
+        color.green + 50,
+        color.blue,
+    );
+    property <brush> click_color: rgba(
+        color.red,
+        color.green,
+        color.blue,
+        0.2);
+    callback on_click();
+    states [
+        hover when touch.has-hover && !touch.pressed: {
+            rect.background: hover_color;
+            rect.border-radius: 6px;
+            in {
+                animate rect.background, rect.border-radius { duration: 200ms; }
+            }
+            out {
+                animate rect.background, rect.border-radius { duration: 200ms; }
+            }
+        }
+        press when touch.pressed: {
+            touch_rect.width: root.width * 1.2;
+            touch_rect.height: root.height * 1.4;
+            in {
+                animate touch_rect.width, touch_rect.height { duration: 50ms; }
+            }
+        }
+    ]
+    touch_rect := Rectangle {
+        width: root.width;
+        height: root.height;
+        border-radius: 12px;
+        background: click_color;
+        border-width: 1px;
+        border-color: #bababa;
+
+    }
+
+    rect := Rectangle {
+        width: root.width;
+        height: root.height;
+        background: color;
+        border-radius: 12px;
+        drop-shadow-color: #161618;
+        drop-shadow-blur: 15px;
+        drop-shadow-offset-x: 3px;
+        drop-shadow-offset-y: 3px;
+        border-color: #ffffff;
+        border-width: 2px;
+    }
+
+    touch := TouchArea {
+        width: parent.width;
+        height: parent.height;
+        clicked => {
+            on_click();
+        }
+    }
+
+    Text {
+        text: text;
+        font-size: 18px;
+        color: white;
+    }
+}
