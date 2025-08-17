@@ -48,7 +48,7 @@ async fn main() {
     let main_view = MainView::new().unwrap();
     let main_view_week = main_view.as_weak();
     main_view.on_open_command_set_window(move || open_command_set_window(main_view_week.clone()));
-    main_view.on_run_command(|arg0: slint::SharedString| run_cmd(arg0.as_str()));
+    main_view.on_run_command(|arg0: SharedString| run_cmd(arg0.as_str()));
     tokio::spawn(update_state_handle(main_view.as_weak()));
     tokio::spawn(init_mqtt("127.0.0.1:1883", "server/0"));
     main_view.run().unwrap();
