@@ -10,7 +10,6 @@ use slint::{ModelRc, SharedString, VecModel, Weak};
 use std::collections::HashMap;
 use std::rc::Rc;
 use std::sync::Arc;
-use std::thread;
 use futures::executor::block_on;
 
 struct ForceSend<T>(T);
