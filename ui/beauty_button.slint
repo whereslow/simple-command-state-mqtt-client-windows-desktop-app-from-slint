@@ -1,7 +1,8 @@
 import { Button } from "std-widgets.slint";
 export component BeautifyButton {
-    width: 80px;
-    height: 40px;
+    in property <float> scale: 1;
+    width: 80px * scale;
+    height: 40px * scale;
     in property <string> text;
     in property <brush> color: #4a69c8;
     property <brush> hover_color: rgb(
@@ -41,7 +42,6 @@ export component BeautifyButton {
         background: click_color;
         border-width: 1px;
         border-color: #bababa;
-
     }
 
     rect := Rectangle {

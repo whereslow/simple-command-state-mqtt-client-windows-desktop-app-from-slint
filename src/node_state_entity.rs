@@ -1,6 +1,6 @@
 use bon::Builder;
-use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 
 // dto
 #[derive(Deserialize)]
@@ -21,7 +21,7 @@ pub struct NodeStateRegister {
     pub id: String,
     pub position_type: i64,
     pub position: Vec<f64>,
-    pub state: HashMap<String, f64>,
+    pub state: HashMap<String, String>,
 }
 
 #[derive(Builder, Serialize)]

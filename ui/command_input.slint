@@ -4,6 +4,7 @@ export component CommandInput {
     width: 300px;
     height: 60px;
     in-out property <string> name:"命令";
+    callback on_click();
     Rectangle {
         background: #74a8ae;
         border-radius: 8px;
@@ -25,6 +26,9 @@ export component CommandInput {
                 text: "执行";
                 col: 1;
                 row: 0;
+                on_click => {
+                    on_click();
+                }
             }
         }
     }

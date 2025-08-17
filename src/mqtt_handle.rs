@@ -2,10 +2,12 @@ use crate::mqtt::pool::MqttConnectionPool;
 use crate::mqtt::receiver::{MQTTConfig, Receiver, mqtt_receiver_with_config};
 use crate::node_state_entity::{ NodeStateChangeString, NodeStateRegister};
 use anyhow::{Error, format_err};
-use log::error;
 use once_cell::sync::Lazy;
+use futures::executor::block_on;
+use tokio::sync::Mutex;
 use std::collections::HashMap;
-use std::sync::{Arc, Mutex, OnceLock};
+use std::sync::{Arc, OnceLock};
+use crate::UPDATE_STATE_EVENT;
 
 pub static TOPIC2RECEIVER: Lazy<Mutex<HashMap<String, Arc<Mutex<Receiver>>>>> =
     Lazy::new(|| Mutex::new(HashMap::new()));
@@ -13,7 +15,6 @@ pub static POOL: OnceLock<Arc<MqttConnectionPool>> = OnceLock::new();
 
 pub static STATE: Lazy<Mutex<HashMap<String, String>>> = Lazy::new(|| Mutex::new(HashMap::new()));
 
-pub static STATE_CHANGE: Lazy<Mutex<bool>> = Lazy::new(|| Mutex::new(false));
 // 暂时不内联 rmqtt
 // pub struct BrokerConfigure {
 //     pub class: String,
@@ -81,7 +82,7 @@ pub async fn add_mqtt_receiver(server_url: &str, topic: &str) -> Result<(), Erro
         username: "".to_string(),
         password: "".to_string(),
     };
-    let mut topic2receiver = TOPIC2RECEIVER.lock().unwrap();
+    let mut topic2receiver = TOPIC2RECEIVER.lock().await;
     topic2receiver.insert(
         topic.to_string(),
         Arc::new(Mutex::new(
@@ -100,21 +101,23 @@ pub async fn add_state_receiver(server_url: &str, topic: &str) -> Result<(), Err
     let receiver = mqtt_receiver_with_config(&mqtt_client_cfg, topic).await;
     receiver.add_callback(|msg| {
         if let Ok(change_data) = serde_json::from_str::<NodeStateChangeString>(msg) {
-            let mut state = STATE.lock().unwrap();
+            let mut state =  block_on(STATE.lock());
             change_data
                 .state_change
                 .iter()
                 .for_each(|(k, v)| match state.get_mut(k) {
                     None => {
-                        error!("State change {} not found", k)
+                        println!("State change {} not found", k)
                     }
                     Some(ori) => {
                         *ori = v.clone();
                     }
                 });
-            *(STATE_CHANGE.lock().unwrap()) = true;
+            // 更新视图
+            UPDATE_STATE_EVENT.clone().notify(1);
         } else if let Ok(register) = serde_json::from_str::<NodeStateRegister>(msg) {
-            let mut state = STATE.lock().unwrap();
+            println!("Register found");
+            let mut state = block_on(STATE.lock());
             state.insert("id".to_string(), register.id);
             state.insert(
                 "position_type".to_string(),
@@ -130,16 +133,28 @@ pub async fn add_state_receiver(server_url: &str, topic: &str) -> Result<(), Err
             for (k, v) in register.state.iter() {
                 state.insert(k.to_string(), v.to_string());
             }
-            *(STATE_CHANGE.lock().unwrap()) = true;
+            // 通知更新视图
+            UPDATE_STATE_EVENT.clone().notify(1);
         } else {
-            error!("State change {} not found", msg)
+            println!("State change {} not found", msg)
         }
     });
-    let mut topic2receiver = TOPIC2RECEIVER.lock().unwrap();
+    let mut topic2receiver = TOPIC2RECEIVER.lock().await;
     topic2receiver.insert(topic.to_string(), Arc::new(Mutex::new(receiver)));
     Ok(())
 }
 
+pub async  fn init_mqtt(server_url: &str, topic: &str) {
+    init_client_pool(server_url.to_string(), 10)
+        .await
+        .unwrap();
+    add_state_receiver(server_url, topic)
+        .await
+        .unwrap();
+    let top2r = TOPIC2RECEIVER.lock().await;
+    let mut receiver = top2r.get(topic).unwrap().lock().await;
+    receiver.start().await;
+}
 #[tokio::test]
 async fn test_mqtt_broker() {
     init_client_pool("127.0.0.1:1883".to_string(), 10)
@@ -148,9 +163,9 @@ async fn test_mqtt_broker() {
     add_state_receiver("127.0.0.1:1883", "test/1")
         .await
         .unwrap();
-    let top2r = TOPIC2RECEIVER.lock().unwrap();
+    let top2r = TOPIC2RECEIVER.lock().await;
     let receiver = top2r.get("test/1").unwrap();
-    let mut receiver = receiver.lock().unwrap();
+    let mut receiver = receiver.lock().await;
     receiver.add_callback(|msg| {
         println!("{:?}", msg);
     });

@@ -1,23 +1,136 @@
 import { BeautifyButton } from "beauty_button.slint";
-import { Button, HorizontalBox } from "std-widgets.slint";
+import { Button, HorizontalBox, VerticalBox, ScrollView, ListView, GridBox } from "std-widgets.slint";
 import { CommandInput } from "command_input.slint";
 import { CommandSetWindow } from "command_set_window.slint";
 export { 
     CommandSetWindow
  }
+
 export component MainView inherits Window {
-    callback on_click();
     callback open_command_set_window();
-    width: 500px;
-    height: 300px;
+    callback run_command(string);
+    in property <[string]> commands:[];
+    in property <[{key:string,value:string}]> node_states: [];
+    width: 1000px;
+    height: 500px;
     HorizontalBox {
-        CommandInput {
-            name: "命令";
+        VerticalBox {
+            Rectangle {
+                height: 30px;
+                background: #f0f0f0;
+                border-radius: 5px;
+                border-color: darkgray;
+                border-width: 1px;
+                Text {
+                    horizontal-alignment: center;
+                    font-size: 16px;
+                    text: "命令列表";
+                }
+            }
+
+            width: 335px;
+            Rectangle {
+                background: #f0f0f0;
+                border-width: 1px;
+                border-color: darkgray;
+                border-radius: 10px;
+                ScrollView {
+                    HorizontalBox {
+                        ListView {
+                            for command[i] in commands: CommandInput {
+                                name: commands[i];
+                                on_click => {
+                                    run_command(commands[i]);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
-        BeautifyButton {
-            text: "Beautify";
-            on_click => {
-                open_command_set_window();
+
+        VerticalBox {
+            alignment: center;
+            Rectangle {
+                background: #f0f0f0;
+                border-radius: 5px;
+                border-width: 1px;
+                border-color: darkgray;
+                height: 30px;
+                Text {
+                    font-size: 16px;
+                    text: "命令创建";
+                }
+            }
+
+            Rectangle {
+                height: parent.height - 55px;
+                background: #f0f0f0;
+                border-radius: 10px;
+                border-width: 1px;
+                border-color: darkgray;
+                BeautifyButton {
+                    scale: 1.5;
+                    text: "创建命令";
+                    on_click => {
+                        open_command_set_window();
+                    }
+                }
+            }
+        }
+
+        VerticalBox {
+            width: 335px;
+            Rectangle {
+                height: 30px;
+                background: #f0f0f0;
+                border-width: 1px;
+                border-radius: 5px;
+                border-color: darkgray;
+                Text {
+                    horizontal-alignment: center;
+                    font-size: 16px;
+                    text: "状态列表";
+                }
+            }
+
+            Rectangle {
+                background: #f0f0f0;
+                border-radius: 10px;
+                border-width: 1px;
+                border-color: darkgray;
+                ScrollView {
+                    HorizontalBox {
+                        ListView {
+                            for state[i] in node_states: Rectangle {
+                                GridBox {
+                                    Text {
+                                        text: node_states[i].key;
+                                        font-family: "微软雅黑";
+                                        color: #ffffff;
+                                        stroke: #000000;
+                                        stroke-width: 1px;
+                                        stroke-style: center;
+                                        font-size: 20px;
+                                        col: 0;
+                                    }
+                                    Rectangle {
+                                        background: #4a69c8;
+                                        border-radius: 5px;
+                                        height: 30px;
+                                        col: 1;
+                                        
+                                    Text {
+                                        text: node_states[i].value;
+                                        font-size: 20px;
+                                        font-family: "Comic Sans MS";
+                                    }
+                                }
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
     }

@@ -6,14 +6,14 @@ build = "build.rs"
 [dependencies]
 tokio = { version = "1", features = ["full"] }
 rumqttc = { version = "0.24.0" }
-rand = "0.9.2"
-slint = { version = "1.12.1" }
+slint = { version = "1.12.1",features = ["renderer-winit-femtovg"] }
 bon = "3.6.5"
 once_cell = { version = "1.21.3" }
 serde_json = "1.0"
 serde = { version = "1.0", features = ["derive"] }
 anyhow = "1.0.98"
-log = "0.4.27"
-env_logger = "0.11.8"
+native-dialog = { version = "0.9.0" }
+event-listener = "1.2.0"
+futures = "0.3.31"
 [build-dependencies]
 slint-build = "1.12.1"

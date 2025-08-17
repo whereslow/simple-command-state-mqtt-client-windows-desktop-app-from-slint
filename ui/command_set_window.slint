@@ -1,13 +1,15 @@
-import { Button, GridBox, VerticalBox, ScrollView, HorizontalBox, ListView, ComboBox } from "std-widgets.slint";
+import { Button, GridBox, VerticalBox, ScrollView, HorizontalBox, ListView, ComboBox, TextEdit } from "std-widgets.slint";
 import { BeautifyButton } from "beauty_button.slint";
 export component CommandSetWindow inherits Dialog {
     width: 600px;
     height: 400px;
+    out property <string> command_name <=> command.text;
+    out property <string> topic_name <=> topic.text;
     in-out property <[{key: string, value: float}]> data:
-    [{ key: "Name", value: 1.2 }, { key: "Age", value: 25.5 }, { key: "City", value: 3.14 }];
-    callback submit([{key: string, value: float}]);
+    [{ key: "", value: 0.0 }];
+    callback submit([{key: string, value: float}], string, string);
     callback add_item();
-    title: "Command Set";
+    title: "命令设置界面";
     ScrollView {
         height: parent.height;
         VerticalLayout {
@@ -16,10 +18,70 @@ export component CommandSetWindow inherits Dialog {
             alignment: center;
             HorizontalBox {
                 width: parent.width;
+                Text {
+                    width: 8rem;
+                    text: "命令名称:";
+                    font-family: "宋体";
+                    font-size: 16px;
+                    letter-spacing: 1px;
+                    stroke-width: 1px;
+                    stroke-style: center;
+                    stroke: #6b2da4;
+                    vertical-alignment: center;
+                    horizontal-alignment: center;
+                }
+
+                Rectangle {
+                    background: #8f9129af;
+                    border-radius: 5px;
+                    width: 120px;
+                    command := TextInput {
+                        text: "";
+                        input-type: text;
+                        font-family: "宋体";
+                        font-size: 16px;
+                        font-weight: 700;
+                        color: #ffcdcd;
+                        text-cursor-width: 10px;
+                    }
+                }
+
+                Text {
+                    width: 8rem;
+                    text: "主题名称:";
+                    font-family: "宋体";
+                    font-size: 16px;
+                    letter-spacing: 1px;
+                    stroke-width: 1px;
+                    stroke-style: center;
+                    stroke: #6b2da4;
+                    vertical-alignment: center;
+                    horizontal-alignment: center;
+                }
+
+                Rectangle {
+                    background: #2f2d88af;
+                    border-radius: 5px;
+                    width: 120px;
+                    topic := TextInput {
+                        text: "";
+                        input-type: text;
+                        font-family: "宋体";
+                        font-size: 16px;
+                        font-weight: 700;
+                        color: #b3d0ff;
+                        text-cursor-width: 10px;
+                    }
+                }
+            }
+
+            HorizontalBox {
+                width: parent.width;
                 ListView {
-                    height: root.height - 120px;
-                    width: parent.width;
-                    for item in data: Rectangle {
+                    vertical-scrollbar-policy: always-on;
+                    height: root.height - 160px;
+                    width: parent.width - 10px;
+                    for item[i] in data: Rectangle {
                         width: parent.width - 20px;
                         background: @radial-gradient(circle, #b834b1, #c7c8de 50%, #070715 100%);
                         border-radius: 8px;
@@ -27,14 +89,11 @@ export component CommandSetWindow inherits Dialog {
                         border-width: 3px;
                         drop-shadow-color: #08091c;
                         drop-shadow-blur: 15px;
-                        
                         drop-shadow-offset-y: 3px;
-                        
                         HorizontalBox {
                             width: parent.width - 50px;
-                            Rectangle {}
                             HorizontalBox {
-                                width: parent.width/2;
+                                width: parent.width / 2;
                                 Text {
                                     width: 5rem;
                                     text: "属性名:";
@@ -45,8 +104,9 @@ export component CommandSetWindow inherits Dialog {
                                     stroke-style: center;
                                     stroke: #6b2da4;
                                     vertical-alignment: center;
-                                    horizontal-alignment:center;
+                                    horizontal-alignment: center;
                                 }
+
                                 Rectangle {
                                     background: #ffffff2e;
                                     border-radius: 3px;
@@ -55,12 +115,16 @@ export component CommandSetWindow inherits Dialog {
                                         text: item.key;
                                         input-type: text;
                                         vertical-alignment: center;
+                                        text-cursor-width: 3px;
+                                        edited => {
+                                            data[i].key = self.text;
+                                        }
                                     }
                                 }
                             }
 
                             HorizontalBox {
-                                width: parent.width/2;
+                                width: parent.width / 2;
                                 Text {
                                     text: "属性值:";
                                     font-family: "宋体";
@@ -71,17 +135,23 @@ export component CommandSetWindow inherits Dialog {
                                     stroke-style: center;
                                     vertical-alignment: center;
                                     stroke: #6b2da4;
-                                    horizontal-alignment:center;
+                                    horizontal-alignment: center;
                                 }
+
                                 Rectangle {
                                     background: #ffffff2e;
                                     border-radius: 3px;
-                                TextInput {
-                                    selection-background-color: #9c9c9c;
-                                    text: item.value;
-                                    input-type: number;
-                                    vertical-alignment: center;
-                                }}
+                                    TextInput {
+                                        selection-background-color: #9c9c9c;
+                                        text: item.value;
+                                        input-type: text;
+                                        vertical-alignment: center;
+                                        text-cursor-width: 3px;
+                                        edited => {
+                                            data[i].value = self.text.to-float();
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
@@ -113,6 +183,9 @@ export component CommandSetWindow inherits Dialog {
 
                             BeautifyButton {
                                 text: "保存";
+                                on_click => {
+                                    submit(data, command_name,topic_name);
+                                }
                             }
                         }
                     }

@@ -46,6 +46,7 @@ impl Receiver {
         // 为每个回调创建新线程
         for callback in callbacks {
             let payload = payload.to_string();
+
             handles.push(thread::spawn(move || {
                 callback(&payload);
             }));
